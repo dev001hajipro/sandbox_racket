@@ -1,0 +1,8 @@
+#lang racket
+; file io
+
+(define out-port (open-output-file "/tmp/tmp.txt" #:exists 'update))
+(displayln "こんにちは世界11" out-port)
+(close-output-port out-port)
+
+;;
