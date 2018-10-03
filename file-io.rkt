@@ -10,3 +10,10 @@
 (close-output-port out-port)
 
 ;;
+
+(with-output-to-file "myfile.bak"
+  (λ () (display "(a 1 b 2)")) #:exists 'replace)
+(define lst
+  (with-input-from-file "myfile.bak"
+    (λ () (read))))
+(print lst)
