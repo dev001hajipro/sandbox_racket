@@ -4,21 +4,21 @@
 (require "common-util.rkt"
          "todo-api.rkt")
 
+(define data-path (store-path data-file))
 
 (define frame (new frame%
-                   [label "Todo app"]
+                   [label "ToDo list"]
                    [width 640]
                    [height 480]))
 
-(define msg (new message%
-                 [parent frame]
-                 [label "No events so far..."]))
-
-(define panel (new horizontal-panel% [parent frame]))
+(define panel (new horizontal-panel%
+                   [parent frame]
+                   [min-height 30]
+                   [stretchable-height 50]))
 
 (define todo-field
   (new text-field% [parent panel]
-       [label "todo"]
+       [label "ToDo"]
        [callback(λ (t event)
                   "")]))
                 
@@ -32,7 +32,9 @@
                   (cond
                     [(> (string-length text-data) 0)
                      (todo-add data-path (send a-text get-text))
-                     (send a-text erase)])))])
+                     (send a-text erase)
+                     (send a-list-box set (todo-show-order data-path))
+                     ])))])
 
 (new button% [parent panel]
      [label "Clear"]
@@ -42,7 +44,18 @@
                   (send a-text erase)))])
                  
 
-(send frame show #t)
+(define a-list-box (new list-box%
+                        [label "You can delete todo by double-click."]
+                        [parent frame]
+                        [min-height 400]
+                        [style (list 'single 'vertical-label)]
+                        [choices (todo-show-order data-path)]
+                        [callback
+                         (λ (c event)
+                           (case (send event get-event-type)
+                             [(list-box-dclick)
+                              (todo-remove data-path (first (send c get-selections)))
+                              (send c set (todo-show-order data-path))
+                              ]))]))
 
-(define data-path (store-path data-file))
-(displayln data-path)
+(send frame show #t)
